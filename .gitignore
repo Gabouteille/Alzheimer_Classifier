@@ -31,10 +31,10 @@ MANIFEST
 
 # Jupyter Notebook
 .ipynb_checkpoints/
-*.ipynb
+#*.ipynb
 
 # Large files
-*.pth
+#*.pth
 *.pt
 *.model
 *.pkl
