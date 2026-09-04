@@ -2,7 +2,7 @@
 
 ## Summary
 
-**Implementation successfully achieves 99.53% test accuracy**, surpassing the original DEMNET paper's 95.23% accuracy on the same Kaggle dataset.
+**Implementation achieves 72.97% test accuracy** with proper data integrity—no synthetic images in test set. This represents a faithful implementation of the DEMNET architecture with correct SMOTE application (training set only).
 
 ---
 
@@ -11,10 +11,9 @@
 ### Overall Scores
 
 ```
-Test Loss:      0.0119
-Test Accuracy:  99.53%
-AUC Score:      97%
-Cohen's Kappa:  0.93
+Test Loss:      0.5629
+Test Accuracy:  72.97%
+Test Set Size:  640 images
 ```
 
 ### Loss Progression
@@ -84,27 +83,28 @@ Epoch 50:  Train: 0.057, Val: 0.071
 
 ---
 
-## 🏆 Comparison with Original Study
+## 🏗️ Implementation Details
 
-### Accuracy Comparison
+### Architecture Fidelity
 
-| Model | Dataset | Classes | Accuracy | AUC | Cohen's Kappa |
-|-------|---------|---------|----------|-----|---------------|
-| **Original DEMNET** | Kaggle | 4 | 95.23% | 97% | 0.93 |
-| **Our Implementation** | Kaggle | 4 | **99.53%** | **97%** | **0.93** |
-| **Improvement** | - | - | **+4.30%** ⬆️ | Same | Same |
+The implementation reproduces the original DEMNET exactly:
 
-### Why Higher Accuracy?
+| Component | Original | Implementation |
+|-----------|----------|---|
+| Total Parameters | 4,534,996 | 4,534,996 ✅ |
+| DEMNET Blocks | 4 blocks | 4 blocks ✅ |
+| Dropout Rates | 0.7, 0.5, 0.2 | 0.7, 0.5, 0.2 ✅ |
+| Batch Normalization | Yes | Yes ✅ |
+| Optimizer | RMSprop | RMSprop ✅ |
+| Learning Rate | 0.001 | 0.001 ✅ |
 
-Possible reasons for the +4.30% improvement:
+### Data Handling
 
-1. **Hardware Efficiency**: Metal (MPS) GPU on macOS may provide better numerical precision
-2. **Regularization**: Properly implemented validation phase with early model saving
-3. **SMOTE Implementation**: Using 'auto' strategy ensures optimal class balance
-4. **Model Initialization**: Different random seed initialization
-5. **Batch Processing**: Specific batch arrangement could favor learning
-
-**Important**: The improvement is within reasonable variance for neural networks and doesn't invalidate the original paper's methodology.
+**Key Implementation Decision**: SMOTE applied ONLY to training set
+- ✅ No synthetic images in validation set
+- ✅ No synthetic images in test set
+- ✅ Prevents data leakage completely
+- ✅ Test set reflects real-world imbalance
 
 ---
 
@@ -323,26 +323,31 @@ random seed = 42   # For numpy shuffling
 
 ---
 
-## 📝 Final Verdict
+## 📝 Summary
 
-### ✅ Production Ready
+### ✅ Accurate Implementation
 
-This DEMNET implementation is:
+This DEMNET implementation:
 
-✅ **Validated**: Matches original paper methodology  
-✅ **Accurate**: 99.53% test accuracy  
-✅ **Generalizable**: Minimal overfitting  
-✅ **Reliable**: 0.93 Cohen's Kappa  
-✅ **Efficient**: ~1 hour training on GPU  
-✅ **Documented**: Full reproducibility  
+✅ **Faithful Architecture**: Matches original DEMNET exactly (4.5M parameters)  
+✅ **Correct Data Handling**: SMOTE applied only to training set (no leakage)  
+✅ **Proper Validation**: Model checkpointing on lowest validation loss  
+✅ **Reproducible**: Full 80/10/10 split with documented hyperparameters  
+✅ **Well-Documented**: Clear code comments and methodology  
 
-### Recommended Use Cases
+### Performance Context
 
-- ✅ Medical image classification demos
-- ✅ Portfolio project for ML interviews
-- ✅ Educational resource for deep learning
-- ✅ Baseline for Alzheimer's detection research
-- ⚠️ Not for actual clinical diagnosis (requires validation on diverse populations)
+- Test Accuracy: 72.97% (on 640 test images, imbalanced distribution)
+- Architecture: Identical to Murugan et al. (2021)
+- Training Time: ~1 hour on macOS Metal GPU
+- No data leakage between train/val/test
+
+### Usage Notes
+
+- ✅ Educational reference for DEMNET architecture
+- ✅ Demonstrates proper SMOTE application in ML pipeline
+- ⚠️ Small test set (640 images) — results for portfolio/learning only
+- ⚠️ Not for clinical diagnosis without additional validation
 
 ---
 
@@ -364,6 +369,6 @@ If you use this implementation, please cite:
 
 ---
 
-**Last Updated**: August 29, 2026  
-**Model Status**: ✅ Validated & Production Ready  
-**Accuracy**: 99.53% on Kaggle Alzheimer's Dataset
+**Last Updated**: September 4, 2026  
+**Model Status**: ✅ Correct Implementation (No Data Leakage)  
+**Accuracy**: 72.97% on 640-image test set (proper 80/10/10 split)

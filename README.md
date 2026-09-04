@@ -18,29 +18,22 @@ The model classifies brain MRI scans into **4 dementia stages**:
 
 | Metric | Value |
 |--------|-------|
-| **Test Accuracy** | **99.53%** |
-| **AUC (Area Under Curve)** | **97%** |
-| **Validation Loss** | 0.0707 |
-| **Train Loss** | 0.0569 |
-| **Cohen's Kappa** | 0.93 |
+| **Test Accuracy** | **72.97%** |
+| **Test Loss** | 0.5629 |
+| **Dataset Size** | 640 test images |
 
-### Comparison with Original Study
+### Notes on Results
 
-| Aspect | Original DEMNET | Our Implementation |
-|--------|-----------------|-------------------|
-| Accuracy | 95.23% | **99.53%** ✅ |
-| AUC | 97% | **97%** ✅ |
-| Model Parameters | 4,534,996 | 4,534,996 ✅ |
-| Dataset | Kaggle | Kaggle ✅ |
-| Classes | 4 | 4 ✅ |
-
-**Our implementation achieves +4.3% higher accuracy while maintaining complete fidelity to the original architecture!**
+- **Architecture**: Faithfully implements original DEMNET (4,534,996 parameters)
+- **Data Handling**: Proper 80/10/10 split with SMOTE applied only to training set (no data leakage)
+- **Test Set**: 640 images from original Kaggle train split (imbalanced distribution preserved)
+- **Class Distribution**: NonDemented (322), VeryMildDemented (217), MildDemented (91), ModerateDemented (10)
 
 ---
 
 ## 🏗️ Model Architecture
 
-The DEMNET model consists of:
+The DEMNET model (faithful to Murugan et al., 2021) consists of:
 
 ```
 Input (176×176×3)
@@ -67,7 +60,7 @@ Output Layer (4 classes, SoftMax)
 Each DEMNET block contains:
 - 2 Conv2D layers with ReLU activation
 - Batch Normalization
-- MaxPooling layer
+- MaxPooling layer (2×2 stride 2)
 
 ---
 
@@ -346,16 +339,16 @@ Retrieved from: https://www.kaggle.com/tourist55/alzheimers-dataset-4-class-of-i
 
 ## ✅ Validation & Testing
 
-The implementation has been validated against:
+The implementation includes:
 - ✅ Original DEMNET architecture (4,534,996 parameters)
-- ✅ SMOTE class balancing methodology
-- ✅ 80/10/10 train/val/test split
-- ✅ All hyperparameters (epochs, batch size, learning rate, etc.)
-- ✅ RMSprop optimizer with 0.001 learning rate
-- ✅ Dropout values (0.7, 0.5, 0.2)
-- ✅ Batch normalization in DEMNET blocks
+- ✅ SMOTE class balancing (applied only to training set, no data leakage)
+- ✅ 80/10/10 train/val/test split on Kaggle training data
+- ✅ All hyperparameters from original paper (50 epochs, batch size 16, lr=0.001)
+- ✅ RMSprop optimizer with proper validation monitoring
+- ✅ Dropout (0.7, 0.5, 0.2) and batch normalization in DEMNET blocks
+- ✅ Model checkpointing (saves best validation loss model)
 
-**Result**: 99.53% accuracy (4.3% improvement over original 95.23%)
+**Result**: 72.97% test accuracy with proper data integrity (no synthetic images in test set)
 
 ---
 
@@ -399,15 +392,15 @@ This project demonstrates:
 ✅ Deep learning for medical image classification  
 ✅ Handling class imbalance with SMOTE  
 ✅ PyTorch model development  
-✅ Proper train/val/test methodology  
+✅ Proper train/val/test methodology with validation phase  
 ✅ GPU acceleration (CUDA, Metal, etc.)  
-✅ Model validation and evaluation  
+✅ Model checkpointing and evaluation  
 ✅ Professional code documentation  
 
-Perfect for portfolio projects and ML interviews!
+Useful for understanding DEMNET architecture and MRI classification pipeline.
 
 ---
 
-**Last Updated**: August 29, 2026  
-**Model Accuracy**: 99.53%  
-**Status**: ✅ Production Ready
+**Last Updated**: September 4, 2026  
+**Model Accuracy**: 72.97%  
+**Status**: ✅ Proper implementation with no data leakage
