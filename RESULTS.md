@@ -16,70 +16,45 @@ Test Accuracy:  72.97%
 Test Set Size:  640 images
 ```
 
-### Loss Progression
+### Training Progression
 
 ```
-Final Train Loss:      0.056917
-Final Val Loss:        0.070685
-Difference:            +0.013768 (minimal overfitting ✓)
+Total Epochs: 50
+Final Train Loss: 0.4036
+Final Val Loss:   0.5740
+Best Val Loss:    0.5740 (Epoch 49)
 ```
 
-**Interpretation**: The minimal difference between training and validation loss indicates excellent generalization without significant overfitting.
+**Interpretation**: Model converges gradually, with best validation performance at epoch 49. Higher test loss (0.5629) compared to validation indicates test set is challenging.
 
 ---
 
-## 📊 Per-Class Performance
+## 📊 Test Set Distribution
 
-### Confusion Matrix
+**Test Set Class Distribution** (original imbalanced):
+- Non-Demented (ND): 322 images
+- Very Mild Demented (VMD): 217 images
+- Mild Demented (MD): 91 images
+- Moderate Demented (MOD): 10 images
+- **Total**: 640 images
 
-```
-                Predicted
-                ND   VMD   MD   MOD
-Actual  ND     314    2    8    2
-        VMD      0  309    0    0
-        MD       2    0  322    5
-        MOD      5    0   37  274
-```
-
-### Detailed Metrics by Class
-
-| Class | Precision | Recall | F1-Score | Support |
-|-------|-----------|--------|----------|---------|
-| **ND (Non-Demented)** | 0.98 | 0.96 | 0.97 | 326 |
-| **VMD (Very Mild)** | 0.99 | 1.00 | 1.00 | 309 |
-| **MD (Mild)** | 0.88 | 0.98 | 0.93 | 329 |
-| **MOD (Moderate)** | 0.98 | 0.87 | 0.92 | 316 |
-| **Weighted Avg** | **0.96** | **0.95** | **0.95** | **1280** |
-
-### Class-Specific Accuracy
-
-- **Non-Demented (ND)**: 96.3% (314/326)
-- **Very Mild Demented (VMD)**: 100.0% (309/309) ⭐
-- **Mild Demented (MD)**: 97.9% (322/329)
-- **Moderate Demented (MOD)**: 86.7% (274/316)
-
-**Note**: VMD class achieves perfect 100% accuracy! Non-Demented also performs excellently at 96.3%.
+**Note**: Detailed confusion matrix and per-class metrics generated during model evaluation. See demnet_implementation.ipynb cell 13 for full metrics.
 
 ---
 
 ## 📈 Training Dynamics
 
-### Loss Curves
+### Training Progression
 
-```
-Epoch 1:   Train: 1.387, Val: 1.343
-Epoch 10:  Train: 0.232, Val: 0.362
-Epoch 20:  Train: 0.089, Val: 0.125
-Epoch 30:  Train: 0.061, Val: 0.082
-Epoch 40:  Train: 0.056, Val: 0.071
-Epoch 50:  Train: 0.057, Val: 0.071
-```
+The model trains for 50 epochs with RMSprop optimizer (lr=0.001):
 
 **Key Observations**:
-- ✅ Rapid convergence in first 10 epochs
-- ✅ Stable plateau from epoch 20 onwards
-- ✅ Excellent generalization (train ≈ val loss)
-- ✅ No catastrophic overfitting
+- ✅ Loss decreases gradually throughout training
+- ✅ Validation loss reaches minimum at epoch 49
+- ✅ Model checkpoint saved at best validation loss
+- ✅ Continues training to full 50 epochs
+
+Training and validation loss curves plotted in notebook (see demnet_implementation.ipynb cell 14).
 
 ---
 
@@ -108,88 +83,63 @@ The implementation reproduces the original DEMNET exactly:
 
 ---
 
-## 📊 Dataset Balancing Impact
+## 📊 Class Balance Management
 
-### Before SMOTE
-
-```
-Original Dataset (12,800 images total):
-├── Non-Demented:      3,200 images (25%)
-├── Very Mild Demented: 2,240 images (17.5%)
-├── Mild Demented:       896 images (7%)
-└── Moderate Demented:    64 images (0.5%) ← SEVERE IMBALANCE!
-```
-
-**Problem**: ModerateDemented has 50× fewer images than NonDemented!
-
-### After SMOTE
+### Original Kaggle Dataset (6,400 images)
 
 ```
-Balanced Dataset (12,800 images total):
-├── Non-Demented:      3,200 images (25%)
-├── Very Mild Demented: 3,200 images (25%)
-├── Mild Demented:      3,200 images (25%)
-└── Moderate Demented:  3,200 images (25%) ✓ PERFECTLY BALANCED!
+Imbalanced Distribution:
+├── Non-Demented:      3,200 images (50%)
+├── Very Mild Demented: 2,240 images (35%)
+├── Mild Demented:       896 images (14%)
+└── Moderate Demented:    64 images (1%) ← SEVERE IMBALANCE!
 ```
 
-**Impact**: SMOTE enabled training on truly balanced data, preventing class bias.
+**Challenge**: ModerateDemented has 50× fewer images than NonDemented!
+
+### After Split & SMOTE (Training Set Only)
+
+```
+Training Set (5,120 → 10,248 after SMOTE):
+├── Non-Demented:      2,562 images (25%)
+├── Very Mild Demented: 2,562 images (25%)
+├── Mild Demented:      2,562 images (25%)
+└── Moderate Demented:  2,562 images (25%) ✓ BALANCED!
+
+Validation & Test Sets: Original imbalance preserved
+```
+
+**Strategy**: SMOTE balances training only; val/test show real-world distribution for honest evaluation.
 
 ---
 
-## 🧠 Model Behavior Analysis
+## 🧠 Observations
 
-### Strengths
+### Architecture Notes
 
-✅ **Perfect VMD Detection (100% recall)**
-- Very Mild Demented is the easiest class to detect
-- Model perfectly identifies early cognitive decline
+- ✅ DEMNET architecture faithfully reproduced from Murugan et al. (2021)
+- ✅ 4,534,996 parameters, identical to original paper
+- ✅ Proper dropout regularization (0.7, 0.5, 0.2)
+- ✅ Batch normalization in all DEMNET blocks
 
-✅ **Excellent Non-Demented Classification (96% accuracy)**
-- Healthy brain patterns well-learned
-- Few false positives (good for medical screening)
+### Data Handling
 
-✅ **Good Overall Generalization**
-- Train loss ≈ Val loss → no major overfitting
-- Stable after epoch 20 → convergence achieved
-
-### Weaknesses
-
-⚠️ **Moderate Demented Confusion**
-- 87% recall (13% false negatives)
-- Often confused with Mild Demented (37 misclassifications)
-- Challenging class due to symptom overlap
-
-⚠️ **Class Overlap**
-- Some Moderate cases classified as Mild (expected - borderline cases)
-- Biological reality: dementia is a spectrum
+- ✅ 80/10/10 split on Kaggle training set only (proper separation)
+- ✅ SMOTE applied only to training set (no test contamination)
+- ✅ Validation and test sets preserve original imbalanced distribution
+- ✅ No data leakage between sets
 
 ---
 
-## 🔬 Validation Strategy
+## 🔬 Model Checkpointing
 
-### Epoch-by-Epoch Best Model Selection
+**Best Model Selection**:
+- Strategy: Save model with lowest validation loss
+- Best checkpoint: Epoch 49 (Val Loss: 0.5740)
+- File: best_demnet_model.pth
+- Used for: Test set evaluation
 
-```python
-Best Model Checkpoint:
-├── Epoch with lowest Val Loss: Epoch 39
-├── Val Loss at best: 0.070685
-├── Train Loss at best: 0.056917
-└── Model saved as: best_demnet_model.pth
-```
-
-### Early Stopping Readiness
-
-The validation curve allows implementing early stopping:
-
-```
-Patience Threshold: 10 epochs without improvement
-Last improvement: Epoch 39 (Val Loss: 0.0707)
-Stopped at: Epoch 50 (no improvement after 11 epochs)
-
-Recommendation: Set early stopping patience to 10 epochs
-→ Would save ~1.5 hours training time
-→ Achieve 99%+ accuracy with 40 epochs
-```
+**Rationale**: Model with lowest validation loss generalizes best to unseen data, which is why it's preferred over final epoch weights.
 
 ---
 
