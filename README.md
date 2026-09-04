@@ -66,15 +66,16 @@ Each DEMNET block contains:
 
 ## 📊 Training Curves
 
-The model shows excellent convergence with minimal overfitting:
+Training converges gradually with increasing validation loss toward the end:
 
 ```
-Train Loss:  0.0569 (final)
-Val Loss:    0.0707 (final)
-Difference:  +0.0138 (minimal overfitting)
+Final Train Loss:  0.4036
+Final Val Loss:    0.5740
+Best Val Loss:     0.5740 (Epoch 49)
+Total Epochs:      50
 ```
 
-Both training and validation losses converge smoothly after epoch 20, indicating proper generalization.
+The model reaches best validation performance at epoch 49, with saved checkpoint used for test evaluation.
 
 ---
 
@@ -142,10 +143,10 @@ The notebook performs:
    - Upsamples minority classes to 3,200 images each
    - Reduces overfitting
 
-3. **Dataset Splitting**
-   - 80% Training (10,240 images after SMOTE)
-   - 10% Validation (1,280 images)
-   - 10% Testing (1,280 images)
+3. **Dataset Splitting** (80/10/10 on Kaggle training set only)
+   - Training: 5,120 images → 10,248 after SMOTE (balanced)
+   - Validation: 640 images (original imbalanced distribution)
+   - Testing: 640 images (original imbalanced distribution)
 
 4. **Model Training**
    - 50 epochs
@@ -250,28 +251,33 @@ Training Set:
 └── VeryMildDemented:  2,240 images
 ```
 
-**After SMOTE Balancing**:
+**After Split & SMOTE** (training set only):
 ```
-All classes: 3,200 images each
-Total: 12,800 images
+Training Set (after SMOTE):
+├── MildDemented:      2,562 images
+├── ModerateDemented:  2,562 images
+├── NonDemented:       2,562 images
+└── VeryMildDemented:  2,562 images
+Total: 10,248 images
+
+Validation Set (original imbalance preserved):
+├── MildDemented:      87 images
+├── ModerateDemented:  3 images
+├── NonDemented:       316 images
+└── VeryMildDemented:  234 images
+Total: 640 images
 ```
 
 ---
 
-## 📊 Confusion Matrix Results
+## 📊 Test Set Results
 
-| True\Pred | ND | VMD | MD | MOD |
-|-----------|----|----|----|----|
-| **ND** | 314 | 2 | 8 | 2 |
-| **VMD** | 0 | 309 | 0 | 0 |
-| **MD** | 2 | 0 | 322 | 5 |
-| **MOD** | 5 | 0 | 37 | 274 |
+**Test Set Statistics**:
+- Total Test Images: 640
+- Test Accuracy: 72.97%
+- Test Loss: 0.5629
 
-**Per-Class Metrics**:
-- ND: Precision=0.98, Recall=0.96, F1=0.97
-- VMD: Precision=0.99, Recall=1.00, F1=1.00
-- MD: Precision=0.88, Recall=0.98, F1=0.93
-- MOD: Precision=0.98, Recall=0.87, F1=0.92
+**Note**: See RESULTS.md for detailed confusion matrix and per-class metrics with full dataset breakdown.
 
 ---
 
