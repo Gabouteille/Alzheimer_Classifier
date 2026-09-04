@@ -140,8 +140,8 @@ The notebook performs:
 
 2. **Class Balancing with SMOTE**
    - Addresses class imbalance (ModerateDemented had only 64 images)
-   - Upsamples minority classes to 3,200 images each
-   - Reduces overfitting
+   - Upsamples minority classes to 2,562 images each in training set
+   - Validation and test sets preserve original imbalanced distribution
 
 3. **Dataset Splitting** (80/10/10 on Kaggle training set only)
    - Training: 5,120 images → 10,248 after SMOTE (balanced)
@@ -355,6 +355,44 @@ The implementation includes:
 - ✅ Model checkpointing (saves best validation loss model)
 
 **Result**: 72.97% test accuracy with proper data integrity (no synthetic images in test set)
+
+---
+
+## ⚠️ Limitations & Context
+
+### Accuracy vs Original Paper
+
+**Why 72.97% vs 95.23%?**
+
+The original DEMNET paper reports 95.23% accuracy, but our 72.97% is **not directly comparable**:
+
+1. **Different Test Set**: 
+   - Original paper: likely evaluates on SMOTE-balanced test set
+   - Our implementation: evaluates on original imbalanced distribution (honest evaluation)
+
+2. **Statistical Significance**:
+   - ModerateDemented has only **10 images** in test set → accuracy on this class not statistically meaningful
+   - NonDemented has 322 images → reliable predictions
+
+3. **Visible Overfitting**:
+   - Training loss: 0.4036 | Validation loss: 0.5740
+   - Gap suggests model memorizes training patterns
+   - Could improve with: early stopping, data augmentation, or regularization tuning
+
+### What This Means
+
+✅ **Architecture is correct** — faithful reproduction of Murugan et al.  
+✅ **Data handling is honest** — no synthetic images in test/val  
+⚠️ **Results are limited** — small test set, visible overfitting  
+⚠️ **Not for production** — would need diverse validation on larger dataset
+
+### Next Steps for Improvement
+
+- Implement early stopping (would stop around epoch 40)
+- Add data augmentation (rotations, flips, intensity shifts)
+- Use class weights in loss function for imbalanced data
+- Evaluate on external validation set from different source
+- Reduce model complexity or increase regularization
 
 ---
 
